@@ -4,10 +4,10 @@
 #' 
 #' Enve-omics representation of fitted growth curves.
 #'
-#' @slot design \code{(array)} Experimental design of the experiment.
-#' @slot models \code{(list)} Fitted growth curve models.
-#' @slot predict \code{(list)} Fitted growth curve values.
-#' @slot call \code{(call)} Call producing this object.
+#' @slot design  \code{(array)} Experimental design of the experiment.
+#' @slot models  \code{(list)}  Fitted growth curve models.
+#' @slot predict \code{(list)}  Fitted growth curve values.
+#' @slot call    \code{(call)}  Call producing this object.
 #' 
 #' @author Luis M. Rodriguez-R [aut, cre]
 #' 
@@ -38,6 +38,7 @@ setMethod("$", "enve.GrowthCurve", function(x, name) attr(x, name))
 #' @param x An \code{\link{enve.GrowthCurve}} object to plot.
 #' @param col Base colors to use for the different samples. Can be recycled.
 #' By default, grey for one sample or rainbow colors for more than one.
+#' @param samples Vector of sample names to plot. By default: plot all samples.
 #' @param pt.alpha Color alpha for the observed data points, using \code{col}
 #' as a base.
 #' @param ln.alpha Color alpha for the fitted growth curve, using \code{col}
@@ -73,6 +74,7 @@ setMethod("$", "enve.GrowthCurve", function(x, name) attr(x, name))
 plot.enve.GrowthCurve <- function(
   x,
   col,
+  samples,
   pt.alpha     = 0.9,
   ln.alpha     = 1.0,
   ln.lwd       = 1,
@@ -90,19 +92,34 @@ plot.enve.GrowthCurve <- function(
   ...
 ) {
   # Arguments
+  design <- x$design
+  
+  if (!missing(samples)) {
+    design <- design[samples]
+  }
+
   if (missing(col)) {
     col <-
-      if (length(x$design) == 0) grey(0.2)
-      else rainbow(length(x$design), v = 3/5, s = 3/5)
+      if (length(design) == 0) grey(0.2)
+      else rainbow(length(design), v = 3/5, s = 3/5)
   }
 
   if (new) {
     # Initiate canvas
-    od.fit.max <- max(sapply(x$predict, function(x) max(x[, "upr"])))
     od.obs.max <- max(sapply(x$models, function(x) max(x$data[, "od"])))
+    od.fit.max <-
+      if (length(x$predict) > 0)
+        max(sapply(
+          x$predict,
+          function(x) if (nrow(x) == 0) 0 else max(x[, "upr"])
+        ))
+      else od.obs.max
     opts <- list(...)
+    time.rng <-
+      if (length(x$predict) > 0) range(x$predict[[1]][, "t"])
+      else c(0, max(sapply(x$models, function(x) max(x$data[, "t"]))))
     plot.defaults <- list(
-      xlab = "Time", ylab = "Density", xlim = range(x$predict[[1]][, "t"]),
+      xlab = "Time", ylab = "Density", xlim = time.rng,
       ylim = c(0, max(od.fit.max, od.obs.max))
     )
     for (i in names(plot.defaults)) {
@@ -114,46 +131,54 @@ plot.enve.GrowthCurve <- function(
   }
 
   # Graphic default
-  pch <- rep(pch, length.out = length(x$design))
-  col <- rep(col, length.out = length(x$design))
+  pch        <- rep(pch, length.out = length(design))
+  col        <- rep(col, length.out = length(design))
   pt.col     <- enve.col2alpha(col, pt.alpha)
   ln.col     <- enve.col2alpha(col, ln.alpha)
   band.col   <- enve.col2alpha(col, band.alpha)
   xp.col     <- enve.col2alpha(col, xp.alpha)
-  band.angle <- rep(band.angle, length.out = length(x$design))
+  band.angle <- rep(band.angle, length.out = length(design))
   if (!all(is.null(band.density))) {
-    band.density <- rep(band.density, length.out = length(x$design))
+    band.density <- rep(band.density, length.out = length(design))
   }
   
-  for (i in 1:length(x$design)) {
+  k <- 0
+  for (i in names(design)) {
+    k <- k + 1
     # Observed data
     d <- x$models[[i]]$data
-    points(d[, "t"], d[, "od"], pch = pch[i], col = pt.col[i])
+    points(d[, "t"], d[, "od"], pch = pch[k], col = pt.col[k])
     for (j in unique(d[, "replicate"])) {
       sel <- d[, "replicate"] == j
       lines(d[sel, "t"], d[sel, "od"],
-            col = xp.col[i], lwd = xp.lwd, lty = xp.lty)
+            col = xp.col[k], lwd = xp.lwd, lty = xp.lty)
     }
 
     # Fitted growth curves
     if (x$models[[i]]$convInfo$isConv) {
       d <- x$predict[[i]]
-      lines(d[, "t"], d[, "fit"], col = ln.col[i], lwd = ln.lwd, lty = ln.lty)
+      lines(d[, "t"], d[, "fit"], col = ln.col[k], lwd = ln.lwd, lty = ln.lty)
       polygon(c(d[, "t"], rev(d[, "t"])), c(d[, "lwr"], rev(d[, "upr"])),
-              border = NA, col = band.col[i], density = band.density[i],
-              angle = band.angle[i])
+              border = NA, col = band.col[k], density = band.density[k],
+              angle = band.angle[k])
     }
   }
 
   if (!all(is.logical(legend)) || legend) {
     if (all(is.logical(legend))) legend <- "bottomright"
-    legend.txt <- names(x$design)
+    legend.txt <- names(design)
     if (add.params) {
-      for (p in names(coef(x$models[[1]]))) {
-        legend.txt <- paste(
-          legend.txt, ", ", p, "=",
-          sapply(x$models, function(x) signif(coef(x)[p], 2)) , sep = ""
-        )
+      params <- names(coef(x$models[[legend.txt[1]]]))
+      for (i in seq_along(design)) {
+        coef <- NULL
+        j <- names(design[i])
+        if (x$models[[j]]$convInfo$isConv) {
+          coef <- signif(coef(x$models[[j]]), 2)
+          coef <- paste(names(coef), coef, sep = "=", collapse = ", ")
+        } else {
+          coef <- "No convergence"
+        }
+        legend.txt[i] <- paste(legend.txt[i], coef, sep = ": ")
       }
     }
     legend(legend, legend = legend.txt, pch = pch, col = ln.col)
@@ -277,6 +302,7 @@ enve.growthcurve <- function(
   enve._growth.fx <<- FUN
 
   for (sample in names(design)) {
+    cat("\r ~", sample, "... ")
     od <- c()
     for (col in design[[sample]]) {
       od <- c(od, x[, col])
@@ -304,21 +330,25 @@ enve.growthcurve <- function(
       }
     }
     mod[[sample]] <- do.call(nls, opts)
-    fit[[sample]] <- cbind(
-      t = new.times,
-      predFit(
-        mod[[sample]], level = level, interval = interval,
-        newdata = data.frame(t = new.times)
-      )
-    )
+    fit[[sample]] <-
+      if (mod[[sample]]$convInfo$isConv)
+        cbind(
+          t = new.times,
+          predFit(
+            mod[[sample]], level = level, interval = interval,
+            newdata = data.frame(t = new.times)
+          )
+        )
+      else data.frame()
   }
+  cat("\r=>", length(design), "samples processed\n")
   enve._growth.fx <<- NULL
   gc <- new(
     "enve.GrowthCurve",
     design = design, models = mod, predict = fit, call = match.call()
   )
   if (plot) plot(gc, ...)
-  return(gc)
+  invisible(gc)
 }
 
 #' Enveomics: Color to Alpha (deprecated)

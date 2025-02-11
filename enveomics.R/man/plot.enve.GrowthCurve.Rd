@@ -7,6 +7,7 @@
 \method{plot}{enve.GrowthCurve}(
   x,
   col,
+  samples,
   pt.alpha = 0.9,
   ln.alpha = 1,
   ln.lwd = 1,
@@ -29,6 +30,8 @@
 
 \item{col}{Base colors to use for the different samples. Can be recycled.
 By default, grey for one sample or rainbow colors for more than one.}
+
+\item{samples}{Vector of sample names to plot. By default: plot all samples.}
 
 \item{pt.alpha}{Color alpha for the observed data points, using \code{col}
 as a base.}
