@@ -236,8 +236,9 @@ Dir.mktmpdir do |dir|
         end
       end
       response = RestClient.post(
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
-        db:"nuccore",rettype:"fasta",id:protIds.join(","),idtype:"acc")
+        'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi',
+        db: 'protein', rettype: 'fasta', id: protIds.join(','), idtype: 'acc'
+      )
       abort "Unable to reach NCBI EUtils, error code " +
         response.code.to_s + "." unless response.code == 200
       fo.puts response.to_str
@@ -315,6 +316,7 @@ Dir.mktmpdir do |dir|
   end
   res = File.open(o[:res], "w") unless o[:res].nil?
   rbm = File.open(o[:rbm], "w") unless o[:rbm].nil?
+  sqlite_db.execute('BEGIN TRANSACTION') unless o[:sqlite3].nil?
   [1,2].each do |i|
     qry_seen = []
     q = "#{dir}/seq#{i}.fa"
@@ -412,6 +414,7 @@ Dir.mktmpdir do |dir|
       o[:sqlite3].nil?
     puts id2/n2 if o[:auto]
   end
+  sqlite_db.execute('COMMIT') unless o[:sqlite3].nil?
   res.close unless o[:res].nil?
   fo.close unless o[:out].nil?
 end

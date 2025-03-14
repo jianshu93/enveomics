@@ -1,24 +1,24 @@
 
-#
-# @author: Luis M. Rodriguez-R
-# @license: artistic license 2.0
-#
+require 'enveomics_rb/utils'
+use 'optparse'
+ARGV << '-h' if ARGV.empty?
 
-require "optparse"
-ARGV << "-h" if ARGV.size==0
+module Enveomics
+  class << self
+    def opt_banner(opt, banner, usage = nil)
+      opt.version ||= $VERSION
+      usage ||= "#{opt.program_name}.rb [options]"
+      opt.banner = <<~BANNER
 
-def use(gems, mandatory=true)
-  gems = [gems] unless gems.is_a? Array
-  begin
-    require "rubygems"
-    while ! gems.empty?
-      require gems.shift
+        [Enveomics Collection: #{opt.program_name} #{opt.version}]
+
+        #{banner}
+
+        Usage
+          #{usage}
+
+      BANNER
     end
-    return true
-  rescue LoadError
-    abort "\nUnmet requirements, please install required gems:" +
-      gems.map{ |gem| "\n   gem install #{gem}" }.join + "\n\n" if mandatory
-    return false
   end
 end
 

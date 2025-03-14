@@ -2,33 +2,61 @@
   "tasks": [
     {
       "task": "BedGraph.tad.rb",
-      "description": ["Estimates the truncated average sequencing depth (TAD)",
-        "from a BedGraph file."],
-      "warn": ["This script doesn't consider zero-coverage positions if",
+      "description": [
+        "Estimates the truncated average sequencing depth (TAD)",
+        "from a BedGraph file."
+      ],
+      "warn": [
+        "This script doesn't consider zero-coverage positions if",
         "missing from the file. If you produce your BedGraph file with",
         "bedtools genomecov and want to consider zero-coverage position, be",
-        "sure to use -bga (not -bg)."],
-      "see_also": ["BedGraph.window.rb",
-        "BlastTab.seqdepth.pl", "BlastTab.seqdepth_ZIP.pl"],
+        "sure to use -bga (not -bg)."
+      ],
+      "see_also": [
+        "BedGraph.window.rb", "BlastTab.seqdepth.pl", "BlastTab.seqdepth_ZIP.pl"
+      ],
       "help_arg": "--help",
       "options": [
         {
           "opt": "--input",
           "arg": "in_file",
           "mandatory": true,
-          "description": "Input BedGraph file."
+          "description": [
+            "Input BedGraph file.",
+            "Supports compression with .gz extension, use - for STDIN."
+          ]
+        },
+        {
+          "opt": "--output",
+          "arg": "out_file",
+          "default": "-",
+          "description": [
+            "Output tab-delimited values (by default, STDOUT).",
+            "Supports compression with .gz extension, use - for STDOUT."
+          ]
         },
         {
           "opt": "--range",
           "arg": "float",
           "default": 0.5,
-          "description": ["Central range to consider, between 0 and 1. By",
-            "default: inter-quartile range (0.5)."]
+          "description": [
+            "Central range to consider, between 0 and 1.",
+            "By default: inter-quartile range (0.5)."
+          ]
+        },
+        {
+          "opt": "--name",
+          "arg": "string",
+          "description": [
+            "Name (ID) of the sequence, added as first column."
+          ]
         },
         {
           "opt": "--per-seq",
-          "description": ["Calculate averages per reference sequence, not",
-            "total. Assumes a sorted BedGraph file."]
+          "description": [
+            "Calculate averages per reference sequence, not total.",
+            "Assumes a sorted BedGraph file."
+          ]
         },
         {
           "opt": "--length",
@@ -60,6 +88,76 @@
           "arg": "float",
           "default": 1000,
           "description": "Window size, in base pairs."
+        }
+      ]
+    },
+    {
+      "task": "sam.filter.rb",
+      "description": ["Filters a SAM or BAM file by target sequences and/or",
+        "identity."],
+      "see_also": ["anir.rb"],
+      "help_arg": "--help",
+      "options": [
+        {
+          "opt": "--genome",
+          "arg": "in_file",
+          "mandatory": true,
+          "description": ["Genome assembly.",
+            "Supports compression with .gz extension."]
+        },
+        {
+          "opt": "--mapping",
+          "arg": "in_file",
+          "mandatory": true,
+          "description": ["Mapping file.",
+            "Supports compression with .gz extension."]
+        },
+        {
+          "opt": "--out-sam",
+          "arg": "out_file",
+          "mandatory": true,
+          "description": ["Output filtered file in SAM format.",
+            "Supports compression with .gz extension."]
+        },
+        {
+          "opt": "--g-format",
+          "arg": "select",
+          "values": ["fasta", "list"],
+          "default": "fasta",
+          "description": ["Genome assembly format."]
+        },
+        {
+          "opt": "--m-format",
+          "arg": "select",
+          "values": ["sam", "bam"],
+          "default": "sam",
+          "description": ["Mapping file format. SAM supports compression with",
+            ".gz file extension."]
+        },
+        {
+          "opt": "--identity",
+          "arg": "float",
+          "description": "Set a fixed threshold of percent identity.",
+          "default": 95.0
+        },
+        {
+          "opt": "--no-header",
+          "description": "Do not include the headers."
+        },
+        {
+          "opt": "--threads",
+          "arg": "integer",
+          "description": "Threads to use.",
+          "default": 2
+        },
+        {
+          "opt": "--log",
+          "arg": "out_file",
+          "description": "Log file to save output."
+        },
+        {
+          "opt": "--quiet",
+          "description": "Run quietly."
         }
       ]
     }

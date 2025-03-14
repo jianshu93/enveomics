@@ -4,7 +4,8 @@
       "task": "FastA.N50.pl",
       "description": ["Calculates the N50 value of a set of sequences.",
         "Alternatively, it can calculate other N** values. It also calculates",
-        "the total number of sequences and the total added length."],
+        "the total number of sequences, the total added length, and the",
+        "longest sequence length."],
       "help_arg": "",
       "see_also": ["FastA.length.pl"],
       "options": [
@@ -354,14 +355,14 @@
           "opt": "--in",
           "arg": "in_file",
           "mandatory": true,
-          "description": "Input FastA file."
+          "description": "Input FastA file (supports .gz compression)."
         },
         {
           "name": "Output file",
           "opt": "--out",
           "arg": "out_file",
           "mandatory": true,
-          "description": "Output FastA file."
+          "description": "Output FastA file (supports .gz compression)."
         },
         {
           "opt": "--fraction",

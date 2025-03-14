@@ -24,11 +24,13 @@
         "BlastTab.pairedHits.rb",
         "BlastTab.subsample.pl",
         "BlastTab.taxid2taxrank.pl",
-        "BlastTab.topHits_sorted.rb"
+        "BlastTab.topHits_sorted.rb",
+        "sam.filter.rb"
       ],
       "Execution": [
         "aai.rb",
         "ani.rb",
+        "anir.rb",
         "HMM.haai.rb",
         "rbm.rb"
       ]
@@ -62,6 +64,7 @@
         "FastA.wrap.rb",
         "FastQ.filter.pl",
         "FastQ.interpose.pl",
+        "FastQ.maskQual.rb",
         "FastQ.offset.pl",
         "FastQ.split.pl",
         "FastQ.tag.rb",
@@ -146,13 +149,16 @@
         "clust.rand.rb"
       ],
       "Read recruitments": [
+        "anir.rb",
         "BedGraph.tad.rb",
         "BedGraph.window.rb",
         "BlastTab.catsbj.pl",
         "BlastTab.pairedHits.rb",
         "BlastTab.recplot2.R",
+        "FastQ.test-error.rb",
         "GFF.catsbj.pl",
-        "RecPlot2.compareIdentities.R"
+        "RecPlot2.compareIdentities.R",
+        "sam.filter.rb"
       ]
     }
   }

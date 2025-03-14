@@ -13,11 +13,11 @@ Enve-omics representation of fitted growth curves.
 \describe{
 \item{\code{design}}{\code{(array)} Experimental design of the experiment.}
 
-\item{\code{models}}{\code{(list)} Fitted growth curve models.}
+\item{\code{models}}{\code{(list)}  Fitted growth curve models.}
 
-\item{\code{predict}}{\code{(list)} Fitted growth curve values.}
+\item{\code{predict}}{\code{(list)}  Fitted growth curve values.}
 
-\item{\code{call}}{\code{(call)} Call producing this object.}
+\item{\code{call}}{\code{(call)}  Call producing this object.}
 }}
 
 \author{
